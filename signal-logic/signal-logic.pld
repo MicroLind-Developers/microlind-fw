@@ -1,0 +1,15 @@
+GAL16V8
+SIGNALLOGIC
+
+E      Q      RW     BA     BS     NC     NC     NC    RDp    GND
+BREQ   RDpp   NC     NC     NC     NC     BAVAIL RD    WR     VCC
+
+/RD = RW & E
+
+/WR = /RW & E & /Q
+
+/BAVAIL = BA & BS & /BREQ
+
+
+DESCRIPTION
+The bla bla
