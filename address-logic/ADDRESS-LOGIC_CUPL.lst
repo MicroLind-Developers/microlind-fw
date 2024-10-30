@@ -1,0 +1,43 @@
+LISTING FOR LOGIC DESCRIPTION FILE: ADDRESS-LOGIC_CUPL.pld           Page 1
+
+CUPL(WM): Universal Compiler for Programmable Logic
+Version 5.0a Serial# 60008009
+Copyright (c) 1983, 1998 Logical Devices, Inc.
+Created Fri Aug 02 20:18:39 2024
+
+  1:Name     Address-Logic ;
+  2:PartNo   00 ;
+  3:Date     2024-08-02 ;
+  4:Revision 01 ;
+  5:Designer Engineer ;
+  6:Company  Sperly Retro Electronics ;
+  7:Assembly None ;
+  8:Location  ;
+  9:Device   g22v10 ;
+ 10:
+ 11:/* *************** INPUT PINS *********************/
+ 12:PIN 1    = A10                       ; /*                                 */ 
+ 13:PIN 2    = A11                       ; /*                                 */ 
+ 14:PIN 3    = A12                       ; /*                                 */ 
+ 15:PIN 4    = A13                       ; /*                                 */ 
+ 16:PIN 5    = A14                       ; /*                                 */ 
+ 17:PIN 6    = A15                       ; /*                                 */ 
+ 18:
+ 19:/* *************** OUTPUT PINS *********************/
+ 20:PIN 19    = SER_EN                   ; /*                                 */ 
+ 21:PIN 22    = RAM_EN                   ; /*                                 */ 
+ 22:PIN 23    = ROM_EN                   ; /*                                 */ 
+ 23:
+ 24:SER_EN = !(A10 & !A11 & A12 & A13 & A14 & A15);
+ 25:RAM_EN = !(!A13 # !A14 # !A15);
+ 26:ROM_EN = !(A13 & A14 & A15 & (!A10 # A11 # !A12));
+ 27:
+ 28:
+ 29:
+
+
+
+Jedec Fuse Checksum       (37f3)
+Jedec Transmit Checksum   (ecf0)
+[0007cc] Please note: invalid download format:  ascii-hex
+[0007cc] Please note: invalid download format:  hl

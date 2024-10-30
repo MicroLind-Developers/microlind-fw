@@ -1,0 +1,47 @@
+LISTING FOR LOGIC DESCRIPTION FILE: SIGNAL-LOGIC_CUPL.pld            Page 1
+
+CUPL(WM): Universal Compiler for Programmable Logic
+Version 5.0a Serial# 60008009
+Copyright (c) 1983, 1998 Logical Devices, Inc.
+Created Fri Aug 02 20:04:27 2024
+
+  1:Name     Signal-Logic ;
+  2:PartNo   00 ;
+  3:Date     2024-08-02 ;
+  4:Revision 01 ;
+  5:Designer Engineer ;
+  6:Company  Sperly Retro Electronics ;
+  7:Assembly None ;
+  8:Location  ;
+  9:Device   g16v8a ;
+ 10:
+ 11:/* *************** INPUT PINS *********************/
+ 12:PIN 1    = E                         ; /*                                 */ 
+ 13:PIN 2    = Q                         ; /*                                 */ 
+ 14:PIN 3    = RW                        ; /*                                 */ 
+ 15:PIN 4    = BA                        ; /*                                 */ 
+ 16:PIN 5    = BS                        ; /*                                 */ 
+ 17:PIN 9    = RDin                      ; /*                                 */ 
+ 18:PIN 11   = BREQ                      ; /*                                 */ 
+ 19:
+ 20:/* *************** OUTPUT PINS *********************/
+ 21:PIN 12    = RDout                    ; /*                                 */ 
+ 22:PIN 17    = BAVAIL                   ; /*                                 */ 
+ 23:PIN 18    = RD                       ; /*                                 */ 
+ 24:PIN 19    = WR                       ; /*                                 */ 
+ 25:
+ 26:
+ 27:RD = !(RW & E);
+ 28:WR = !(!RW & E & !Q);
+ 29:
+ 30:
+ 31:
+ 32:
+ 33:
+
+
+
+Jedec Fuse Checksum       (10cf)
+Jedec Transmit Checksum   (85b8)
+[0007cc] Please note: invalid download format:  ascii-hex
+[0007cc] Please note: invalid download format:  hl

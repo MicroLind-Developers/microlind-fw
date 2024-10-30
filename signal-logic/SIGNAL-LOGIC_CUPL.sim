@@ -1,0 +1,25 @@
+%SIGNAL
+PIN   4 =  BA 
+PIN  17 =  BAVAIL 
+PIN  11 =  BREQ 
+PIN   5 =  BS 
+PIN   1 =  E 
+PIN   2 =  Q 
+PIN  18 =  RD 
+PIN   9 =  RDin 
+PIN  12 =  RDout 
+PIN   3 =  RW 
+PIN  19 =  WR 
+%END
+
+%FIELD
+%END
+
+%EQUATION
+RD =>
+    E & RW
+
+WR =>
+    E & !Q & !RW
+
+%END
