@@ -1,7 +1,6 @@
-    org $FE00
-default_string
-        FCN "Debug print from microLind"
+    include serial_6552.asm
 
+; Set 
     org $FF00
 hook_trap:
 hook_swi3:
@@ -11,22 +10,30 @@ hook_firq:
 hook_irq:
 hook_nmi:
 hook_restart:
-    lds #$0100              ;Set system stack pointer to bottom of stack
-    jsr clear_regs
-    jsr SER_INIT
-
+    ; Setup stack pointer for gods sake!!!
+    lds #$0200              ;Set system stack pointer to bottom of stack
+    jsr INIT
+    jsr SERIAL_INIT_A
+wait_for_cr:
+    jsr SERIAL_INPUT_A
+    cmpa #$0d
+    bne wait_for_cr
+    ldx #str_greet
+    jsr SERIAL_PRINT
 loop:
-    ldx #default_string
-    jsr PRINT_S1
-
-    ;ldy #$0100              ;Start of memory area to test
-    ;ldx #$dfff              ;Length of tested memory
-    ;pshs x,y                ;Save parameters on stack
     bra loop
-    ;jsr ramtest             ;Start test
 
 
-clear_regs:
+
+; System init function
+INIT:
+    jsr CLEAR_REGS
+    orcc #$50
+    lda #$c0
+    tfr a,dp
+    rts
+
+CLEAR_REGS:
     ldq     #$00000000
     tfr     a,dp
     tfr     d,x
@@ -36,13 +43,21 @@ clear_regs:
     andcc   #$00
     rts
 
+    org $F000
+str_greet:
+    fcn 'microLind initialized...'
+str_start_memcheck:
+    fcn 'Starting memcheck...'
+
+; Setup vectors
     org $FFF0
 
-vtrap: fdb hook_trap
-vswi3: fdb hook_swi3
-vswi2: fdb hook_swi2
-vfirq: fdb hook_firq
-virq: fdb hook_irq
-vswi: fdb hook_swi
-vnmi: fdb hook_nmi
-vrestart: fdb hook_restart
+V_TRAP:     fdb hook_trap
+V_SWI3:     fdb hook_swi3
+V_SWI2:     fdb hook_swi2
+V_FIRQ:     fdb hook_firq
+V_IRQ:      fdb hook_irq
+V_SWI:      fdb hook_swi
+V_NMI:      fdb hook_nmi
+V_RESET:    fdb hook_restart
+

@@ -1,0 +1,27 @@
+Name     Address-Logic ;
+PartNo   00 ;
+Date     2024-08-02 ;
+Revision 01 ;
+Designer Engineer ;
+Company  Sperly Retro Electronics ;
+Assembly None ;
+Location  ;
+Device   g22v10 ;
+
+/* *************** INPUT PINS *********************/
+PIN 1    = A10                       ; /*                                 */ 
+PIN 2    = A11                       ; /*                                 */ 
+PIN 3    = A12                       ; /*                                 */ 
+PIN 4    = A13                       ; /*                                 */ 
+PIN 5    = A14                       ; /*                                 */ 
+PIN 6    = A15                       ; /*                                 */ 
+
+/* *************** OUTPUT PINS *********************/
+PIN 19    = SER_EN                   ; /*                                 */ 
+PIN 22    = RAM_EN                   ; /*                                 */ 
+PIN 23    = ROM_EN                   ; /*                                 */ 
+
+SER_EN = !(A10 & !A11 & A12 & A13 & A14 & A15);
+RAM_EN = !(!A13 # !A14 # !A15);
+ROM_EN = !(A13 & A14 & A15 & (!A10 # A11 # !A12));
+
