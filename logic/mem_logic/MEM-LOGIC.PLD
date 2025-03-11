@@ -1,0 +1,50 @@
+Name     Memory-Logic ;
+PartNo   00 ;
+Date     2024-12-28 ;
+Revision 01 ;
+Designer Engineer ;
+Company  Sperly Retro Electronics ;
+Assembly None ;
+Location  ;
+Device   g22v10 ;
+
+/* *************** INPUT PINS *********************/
+PIN [1..6]    = [A10..15]            ; /*                                 */ 
+PIN [7..9]    = [AM0..2]             ; /* AM19 - AM21                     */
+PIN 10   = A0                        ; /*                                 */
+PIN 11   = A1                        ; /*                                 */
+PIN 13   = !MEM_RD                   ; /*                                 */ 
+PIN 14   = !MAP_EN                   ; /*                                 */ 
+
+/* *************** OUTPUT PINS *********************/
+PIN 23    = !ROM_EN                   ; /* Enable ROM                      */
+PIN 22    = !RAML_EN                  ; /* Enable Low RAM                  */
+PIN 21    = !RAMH_EN                  ; /* Enable High RAM                 */ 
+PIN 20    = !RAMX_EN                  ; /* Enable Exp. RAM                 */
+PIN 19    = !IO_EN                    ; /* Enable IO                       */
+PIN 18    = !MAP_RD                   ; /* Enable High RAM                 */
+PIN 17    = BANK_SEL0                 ; /* Bank Reg select 0               */
+PIN 16    = BANK_SEL1                 ; /* Bank Reg select 1               */
+
+field memaddr = [A10..15]             ; /*  0x00-64                        */
+field h_memaddr = [AM0..2]            ; /*  0-7                            */
+
+ram_eqn = memaddr:[0000..DFFF]  ;
+rom0_eqn = memaddr:[E000..F3FF] ;
+rom1_eqn = memaddr:[F800..FFFF] ;
+io_eqn = memaddr:[F400..F7FF] ;
+
+bank0_eqn = h_memaddr:[0] ;
+bank1_eqn = h_memaddr:[1] ;
+bankx_eqn = h_memaddr:[2..7] ;
+
+
+
+ROM_EN = rom0_eqn # rom1_eqn ; 
+RAML_EN = ram_eqn & bank0_eqn ;
+RAMH_EN = ram_eqn & bank1_eqn ;
+RAMX_EN = ram_eqn & bankx_eqn ;
+IO_EN = io_eqn ;
+MAP_RD = (ram_eqn & MAP_EN) # (MEM_RD & MAP_EN) ;
+BANK_SEL0 = (MEM_RD & A0) # (!MEM_RD & A14) ;
+BANK_SEL1 = (MEM_RD & A1) # (!MEM_RD & A15) ;

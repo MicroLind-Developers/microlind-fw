@@ -50,6 +50,10 @@
 *.pdf
 *.pla
 *.sim
+*.jed
+*.sim
+*.si
+
 
 
 **/build

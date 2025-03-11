@@ -1,0 +1,19 @@
+Name     irq-logic.dig ;
+PartNo   00 ;
+Date     25.12.2024 ;
+Revision 01 ;
+Designer ericr ;
+Company  unknown ;
+Assembly None ;
+Location unknown ;
+Device   f1508ispplcc84 ;
+
+ar = 'b'0 ;
+
+/* inputs */
+
+/* outputs */
+NODE Y;
+
+/* combinatorial logic */
+Y = 'b'0;
