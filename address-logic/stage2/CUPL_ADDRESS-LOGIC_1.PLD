@@ -1,0 +1,76 @@
+Name     Address-Logic ;
+PartNo   01 ;
+Date     2024-11-05 ;
+Revision 01 ;
+Designer Engineer ;
+Company  Sperly Retro Electronics ;
+Assembly None ;
+Location  ;
+Device   g22v10 ;
+
+/* *************** INPUT PINS *********************/
+PIN 1    = A0                       ;
+PIN 2    = A1                       ;
+PIN 3    = A2                       ;
+PIN 4    = A3                       ;
+PIN 5    = A4                       ;
+PIN 6    = A5                       ;
+PIN 7    = A6                       ;
+PIN 8    = A7                       ;
+PIN 9    = A8                       ;
+PIN 10   = A9                       ;
+PIN 11   = !IO_EN                   ;
+PIN 13   = !WR                      ;
+
+/* *************** OUTPUT PINS *********************/
+PIN 14    = !MMU_EN                  ; 
+PIN 15    = !IRQ_EN                  ;
+PIN 16    = !CF_EN                   ;
+PIN 17    = !SER_EN                  ;
+PIN 18    = !PAR_EN                  ;
+PIN 19    = !PS2_EN                  ;
+PIN 20    = !SND_EN                  ;
+PIN 21    = !XXXXX                   ;
+PIN 22    = !VDC_EN                  ;
+PIN 23    = !EXP_EN                  ;
+
+/* IO_EN = $F400 (IO_BASE)*/
+
+!COMMON = IO_EN & !WR ;
+F400 = !COMMON & !A8 & !A9 ;
+F500 = !COMMON & A8 & !A9 ;
+
+!MMU_EN = F400 & !A7 & !A6 & !A5 & !A4 & !A3 & !A2  ; $F400 - F403 
+!IRQ_EN = F400 & !A7 & !A6 & !A5 & !A4 & !A3 & A2 & !A1 & !A0; $F404
+!PS2_EN = F400 & !A7 & !A6 & !A5 & !A4 & !A3 & A2 & A1 ; $F406 - $F407
+
+!CF_EN = F400 & !A7 & !A6 & !A5 & !A4 & A3 ; $F408-$F40F
+
+!PAR_EN = F400 & !A7 & !A6 & !A5 & A4 ; $F410-$F41F
+
+!SER_EN = F400 & !A7 & !A6 & A5 & !A4 & !A3 ; $F420-$F428
+
+!VDC_EN = F400 & !A7 & A6 ; $F440-$F47F
+
+!SND_EN = F400 & A7 ; $F480-F4FF
+
+;
+;   $F500 Empty so far...
+;
+
+!EXP_EN = !COMMON & A9 ; $F600-F7FF For expansion port
+
+
+
+
+
+
+
+
+
+
+
+
+/* AND - & */
+/* OR  - # */
+/* NOT - ! */

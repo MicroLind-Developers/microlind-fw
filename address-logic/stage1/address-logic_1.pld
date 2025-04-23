@@ -1,0 +1,16 @@
+GAL22V10
+ADDRESSLOGIC_1
+
+A10    A11    A12    A13    A14    A15    NC     NC     NC     NC     NC     GND
+NC     NC     NC     NC     NC     NC     SEREN  NC     NC     RAMEN  ROM  VCC
+
+
+/SEREN = A10 & /A11 & A12 & A13 & A14 & A15
+
+/RAMEN = /A13 + /A14 + /A15
+
+/ROM = A13 & A14 & A15 & /A10 + A13 & A14 & A15 & A11 + A13 & A14 & A15 & /A12 
+
+
+DESCRIPTION
+The bla bla

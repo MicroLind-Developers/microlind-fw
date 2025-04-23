@@ -1,0 +1,26 @@
+GAL22V10
+ALOGIC1
+
+A0  A1      A2      A3     A4      A5      A6      A7      A8  A9      IOEN   GND
+WR  MMUEN  IRQEN  CFEN  SEREN  PAREN  PS2EN  SNDEN  NC  VDCEN  EXPEN  VCC
+
+/MMUEN = /IOEN * /WR * /A8 * /A9 * /A7 * /A6 * /A5 * /A4 * /A3 * /A2
+/IRQEN = /IOEN * /WR * /A8 * /A9 * /A7 * /A6 * /A5 * /A4 * /A3 * A2 * /A1 * /A0
+/PS2EN = /IOEN * /WR * /A8 * /A9 * /A7 * /A6 * /A5 * /A4 * /A3 * A2 * A1 
+
+/CFEN = /IOEN * /WR * /A8 * /A9 * /A7 * /A6 * /A5 * /A4 * A3 
+
+/PAREN = /IOEN * /WR * /A8 * /A9 * /A7 * /A6 * /A5 * A4 
+
+/SEREN = /IOEN * /WR * /A8 * /A9 * /A7 * /A6 * A5 * /A4 * /A3 
+
+/VDCEN = /IOEN * /WR * /A8 * /A9 * /A7 * A6
+
+/SNDEN = /IOEN * /WR * /A8 * /A9 * A7
+
+/EXPEN = /IOEN * /WR * A9
+
+DESCRIPTION
+The bla bla
+
+*************************************************
