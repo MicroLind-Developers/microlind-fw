@@ -1,0 +1,23 @@
+Name     Test ;
+PartNo   00 ;
+Date     2025-03-29 ;
+Revision 1 ;
+Designer Engineer ;
+Company  Sperly Retro Electronics ;
+Assembly None ;
+Location  ;
+Device   G16V8A ;
+
+/* *************** INPUT PINS *********************/
+PIN 2    =  A                         ; 
+PIN 3    =  B                         ; 
+
+/* *************** OUTPUT PINS *********************/
+
+PIN 18    = Y                      ;
+PIN 19    = X                      ; 
+
+
+/* ********************* LOGIC *********************/
+X = A & B;
+Y = A # B;
