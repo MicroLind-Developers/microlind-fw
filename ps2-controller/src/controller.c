@@ -193,7 +193,6 @@ void rtc_tick() {
   }
 }
 
-// -------------------- Unified RTC Timer Init --------------------
 void rtc_timer_init() {
   TCCR2A = 0x00;
   TCCR2B = (1 << CS22) | (1 << CS20);  // prescaler 128

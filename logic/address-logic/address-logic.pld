@@ -1,7 +1,7 @@
 Name     Address-Logic ;
 PartNo   00 ;
-Date     2025-03-11 ;
-Revision 04 ;
+Date     2025-08-11 ;
+Revision 05 ;
 Designer Engineer ;
 Company  Sperly Retro Electronics ;
 Assembly None ;
@@ -9,40 +9,39 @@ Location  ;
 Device   G22V10;
 
 /* *************** INPUT PINS *********************/
-pin 1 			= A0 ;
-pin 2 			= A1 ;
-pin 3 			= A2 ;
-pin 4 			= A3 ;
-pin 5 			= A4 ;
-pin 6 			= A5 ;
-pin 7 			= A6 ;
-pin 8 			= A7 ;
-pin 9 			= A8 ;
-pin 10			= A9 ;
-pin 11			= !IOEN ;
-pin 13			= !WR ;
+pin 1             = A0 ;
+pin 2             = A1 ;
+pin 3             = A2 ;
+pin 4             = A3 ;
+pin 5             = A4 ;
+pin 6             = A5 ;
+pin 7             = A6 ;
+pin 8             = A7 ;
+pin 9             = A8 ;
+pin 10            = A9 ;
+pin 11            = !IOEN ;
+pin 13            = !WR ;
 
 /* *************** OUTPUT PINS *********************/
-PIN 14			= !EXP_EN ; /* Enable Expansion Port   */
-PIN 15   	 	= !VDC_EN ; /* Enable Video Port               */
-PIN 16    		= !SNDR_EN ; /* Enable Sound Port Right         */
-PIN 17    		= !SNDL_EN ; /* Enable Sound Port Left          */
-PIN 18			= !CF_EN ; /* Enable Compact Flash            */
-PIN 19    		= !PAR_EN ; /* Enable Parallel Port            */
-PIN 20    		= !SER_EN ; /* Enable Serial Port              */
-PIN 21    		= !PWR_EN ; /* Enable PowerLed Port            */
-PIN 22    		= !IRQ_EN ; /* Enable IRQ Handler              */ 
-PIN 23   		= !MEM_EN ; /* Enable MMU                      */ 
+PIN 14            = !EXP_EN ;     /* Enable Expansion Port            */
+PIN 15            = !VDC_EN ;     /* Enable Video Port                */
+PIN 16            = !SNDR_EN ;    /* Enable Sound Port Right          */
+PIN 17            = !SNDL_EN ;    /* Enable Sound Port Left           */
+PIN 18            = !CF_EN ;      /* Enable Compact Flash             */
+PIN 19            = !PAR_EN ;     /* Enable Parallel Port             */
+PIN 20            = !SER_EN ;     /* Enable Serial Port               */
+PIN 21            = !PWR_EN ;     /* Enable PowerLed Port             */
+PIN 22            = !IRQ_EN ;     /* Enable IRQ Handler               */ 
+PIN 23            = !MEM_EN ;     /* Enable MMU                       */ 
 
 /* Output control */
-MEM_EN =		IOEN & !A9 & !A8 & !A7 & !A6 & !A5 & !A4 & !A3 & !A2						;/* $F400-$F403 */
-IRQ_EN =		IOEN & !A9 & !A8 & !A7 & !A6 & !A5 & !A4 & !A3 &  A2 & !A1 & !A0			;/* $F404       */
-PWR_EN =		IOEN & !A9 & !A8 & !A7 & !A6 & !A5 & !A4 & !A3 &  A2 & !A1 &  A0 & WR		;/* $F405       */
-/*PS2_EN =	IOEN & !A9 & !A8 & !A7 & !A6 & !A5 & !A4 & !A3 &  A2 &  A1				;*/ /* $F406-$F407 */
-CF_EN  =		IOEN & !A9 & !A8 & !A7 & !A6 & !A5 & !A4 &  A3							;/* $F408-$F40F */
-PAR_EN =		IOEN & !A9 & !A8 & !A7 & !A6 & !A5 &  A4								;/* $F410-$F41F */
-SER_EN =		IOEN & !A9 & !A8 & !A7 & !A6 &  A5 & !A4								;/* $F420-$F42F */
-VDC_EN =		IOEN & !A9 & !A8 & !A7 &  A6											;/* $F440-$F47F */
-SNDL_EN =	IOEN & !A9 & !A8 &  A7 & !A6											;/* $F480-$F4BF */
-SNDR_EN =	IOEN & !A9 & !A8 &  A7 &  A6											;/* $F4C0-$F4FF */
-EXP_EN = 	IOEN &  A9 # !A9 &  A8 & IOEN											;/* $F500-$F7FF */
+MEM_EN =    IOEN & !A9 & !A8 & !A7 & !A6 & !A5 & !A4 & !A3 & !A2                    ;/* $F400-$F403 2-bit */
+IRQ_EN =    IOEN & !A9 & !A8 & !A7 & !A6 & !A5 & !A4 & !A3 &  A2 & !A1 & !A0        ;/* $F404       0-bit */
+PWR_EN =    IOEN & !A9 & !A8 & !A7 & !A6 & !A5 & !A4 & !A3 &  A2 & !A1 &  A0 & WR   ;/* $F405       0-bit */
+PS2_EN =    IOEN & !A9 & !A8 & !A7 & !A6 & !A5 &  A4 & !A3                          ;/* $F410-$F417 3-bit */
+CF_EN  =    IOEN & !A9 & !A8 & !A7 & !A6 & !A5 &  A4 &  A3                          ;/* $F418-$F41F 3-bit */
+PAR_EN =    IOEN & !A9 & !A8 & !A7 & !A6 &  A5 & !A4                                ;/* $F420-$F42F 4-bit */
+SER_EN =    IOEN & !A9 & !A8 & !A7 & !A6 &  A5 &  A4                                ;/* $F430-$F43F 4-bit */
+VDC_EN =    IOEN & !A9 & !A8 & !A7 &  A6                                            ;/* $F440-$F47F 6-bit */
+SND_EN =    IOEN & !A9 & !A8 &  A7 & !A6                                            ;/* $F480-$F4BF 6-bit */
+EXP_EN =    IOEN &  A9 & !A8 &  A7 # IOEN & A9 & A8                                 ;/* $F500-$F7FF 3x8-bit */
