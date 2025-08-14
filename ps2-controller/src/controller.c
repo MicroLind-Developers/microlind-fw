@@ -9,36 +9,41 @@
 #include <stdint.h>
 
 // -------------------- Config --------------------
-#define FIFO_SIZE 64
-#define EEPROM_ADDR_LOWBAT 0x10
-#define EEPROM_ADDR_EEPROM_ERROR_FLAG 0x11
-#define EEPROM_ADDR_TX_ACK_FAIL 0x12
-#define EEPROM_ADDR_RTC_BASE 0x20
-#define EEPROM_RTC_SLOTS 40
-#define EEPROM_RTC_SIZE 8  // 7 bytes data + 1 checksum
+#define FIFO_SIZE                       64      // 64 bytes fifo bufferfor keyboard and mouse data
 
-#define LOW_BATTERY_THRESHOLD 2200  // millivolts after the diode voltage drop, so 2.8 ish at the cell.
-#define POWER_ON_VOLTAGE_THRESHOLD 3700  // Above this we assume the VCC from computer is OK.
+// EEPROM addresses
+#define EEPROM_ADDR_LOWBAT              0x10    // Low battery flag
+#define EEPROM_ADDR_EEPROM_ERROR_FLAG   0x11    // EEPROM error flag
+#define EEPROM_ADDR_TX_ACK_FAIL         0x12    // PS/2 TX ACK fail flag
+#define EEPROM_ADDR_RTC_BASE            0x20    // RTC data base address
+
+// RTC data storage 
+#define EEPROM_RTC_SLOTS                40      // 40 slots to store rtc data
+#define EEPROM_RTC_SIZE                 8       // 7 bytes data + 1 checksum
+
+// Voltage thresholds for detecting low battery and power on
+#define LOW_BATTERY_THRESHOLD           2200    // millivolts after the diode voltage drop, so 2.8 ish at the cell.
+#define POWER_ON_VOLTAGE_THRESHOLD      3700    // Above this we assume the VCC from computer is OK.
 
 // Pin assignments
-#define BUS_EN_PIN    PB0   // Enable input
-#define BUS_RD_PIN    PB3   // Read strobe
-#define BUS_WR_PIN    PB4   // Write strobe
-#define BUS_IRQ_KB    PB1   // Keyboard IRQ output
-#define BUS_IRQ_MS    PB2   // Mouse IRQ output
-#define BUS_ADDR_A0   PC0   // Address line A0
-#define BUS_ADDR_A1   PC1   // Address line A1
-#define BUS_ADDR_A2   PC2   // Address line A2
-#define BUS_DATA_PORT PORTD
-#define BUS_DATA_DDR  DDRD
-#define BUS_DATA_PIN  PIND
+#define BUS_EN_PIN                      PB0     // Enable input
+#define BUS_RD_PIN                      PB3     // Read strobe
+#define BUS_WR_PIN                      PB4     // Write strobe
+#define BUS_IRQ_KB                      PB1     // Keyboard IRQ output
+#define BUS_IRQ_MS                      PB2     // Mouse IRQ output
+#define BUS_ADDR_A0                     PC0     // Address line A0
+#define BUS_ADDR_A1                     PC1     // Address line A1
+#define BUS_ADDR_A2                     PC2     // Address line A2
+#define BUS_DATA_PORT                   PORTD   // Data port
+#define BUS_DATA_DDR                    DDRD    // Data direction register
+#define BUS_DATA_PIN                    PIND    // Data input register
 
-#define PS2_KEYBOARD_CLK  PC3
-#define PS2_KEYBOARD_DATA PC4
-#define PS2_MOUSE_CLK     PC5
-#define PS2_MOUSE_DATA    PC6
+#define PS2_KEYBOARD_CLK                PC3     // PS/2 keyboard clock pin  
+#define PS2_KEYBOARD_DATA               PC4     // PS/2 keyboard data pin
+#define PS2_MOUSE_CLK                   PC5     // PS/2 mouse clock pin
+#define PS2_MOUSE_DATA                  PC6     // PS/2 mouse data pin
 
-#define SPARE_PIN PB5
+#define SPARE_PIN                       PB5     // Spare pin
 
 // -------------------- Globals --------------------
 typedef struct {
@@ -47,12 +52,21 @@ typedef struct {
   volatile uint8_t tail;
 } FIFO;
 
+typedef struct {
+  uint8_t year;  // 1970 = 0, 2025 = 55
+  uint8_t month; // 1 = January, 12 = December
+  uint8_t day;   // 1 = First day of the month, 28,29,30 or 31 = Last day of the month
+  uint8_t dow;  // 0 = Monday, 6 = Sunday
+  uint8_t hour; // 0 = 00, 23 = 23
+  uint8_t minute; // 0 = 00, 59 = 59
+  uint8_t second; // 0 = 00, 60 = 60  (if leap second is needed, it will be 60)
+} RTC_DATA;
+
 FIFO kb_fifo = {{0}, 0, 0};
 FIFO ms_fifo = {{0}, 0, 0};
 FIFO tx_fifo = {{0}, 0, 0}; // PS/2 TX buffer for keyboard
 
-volatile uint8_t rtc_sec = 0, rtc_min = 0, rtc_hr = 0;
-volatile uint8_t rtc_day = 1, rtc_month = 1, rtc_year = 25, rtc_dow = 0;
+volatile RTC_DATA rtc_data = {55, 1, 1, 0, 0, 0, 0};
 volatile bool lowbat_flag = false;
 volatile bool rtc_eeprom_error = false;
 volatile bool ps2_ack_error = false;
@@ -66,8 +80,8 @@ volatile uint8_t ps2_ms_bitcount = 0;
 volatile uint8_t ps2_ms_byte = 0;
 
 // -------------------- Prototypes --------------------
-void fifo_push(FIFO* f, uint8_t val);
-bool fifo_pop(FIFO* f, uint8_t* val);
+void fifo_push(FIFO* fifo_buffer, uint8_t val);
+bool fifo_pop(FIFO* fifo_buffer, uint8_t* val);
 uint16_t read_vcc_mv();
 bool is_leap_year(uint8_t year);
 uint8_t days_in_month(uint8_t month, uint8_t year);
@@ -125,13 +139,13 @@ uint8_t days_in_month(uint8_t month, uint8_t year) {
 }
 
 uint8_t rtc_checksum(uint8_t* data) {
-  uint8_t sum = 0;
+  uint16_t sum = 0;
   for (uint8_t i = 0; i < 7; i++) sum += data[i];
-  return ~sum + 1;
+  return ~(uint8_t)(sum & 0xFF) + 1;
 }
 
 void save_rtc_to_eeprom() {
-  uint8_t data[8] = { rtc_sec, rtc_min, rtc_hr, rtc_day, rtc_month, rtc_year, rtc_dow };
+  uint8_t data[8] = { rtc_data.year, rtc_data.month, rtc_data.day, rtc_data.dow, rtc_data.hour, rtc_data.minute, rtc_data.second , 0};
   data[7] = rtc_checksum(data);
 
   uint16_t base = EEPROM_ADDR_RTC_BASE + (rtc_save_index * EEPROM_RTC_SIZE);
@@ -150,13 +164,13 @@ void load_rtc_from_eeprom() {
       data[j] = eeprom_read_byte((uint8_t*)(base + j));
     }
     if (rtc_checksum(data) == data[7]) {
-      rtc_sec = data[0];
-      rtc_min = data[1];
-      rtc_hr = data[2];
-      rtc_day = data[3];
-      rtc_month = data[4];
-      rtc_year = data[5];
-      rtc_dow = data[6];
+      rtc_data.year = data[0];
+      rtc_data.month = data[1];
+      rtc_data.day = data[2];
+      rtc_data.dow = data[3];
+      rtc_data.hour = data[4];
+      rtc_data.minute = data[5];
+      rtc_data.second = data[6];
       rtc_save_index = (i + 1) % EEPROM_RTC_SLOTS;
       rtc_eeprom_error = false;
       return;
@@ -166,26 +180,31 @@ void load_rtc_from_eeprom() {
     }
   }
   // No valid record found; use default time
-  rtc_sec = rtc_min = rtc_hr = 0;
-  rtc_day = 1; rtc_month = 1; rtc_year = 25; rtc_dow = 0;
+  rtc_data.year = 55;
+  rtc_data.month = 1;
+  rtc_data.day = 1;
+  rtc_data.dow = 0;
+  rtc_data.hour = 0;
+  rtc_data.minute = 0;
+  rtc_data.second = 0;
   rtc_save_index = 0;
 }
 
 void rtc_tick() {
-  if (++rtc_sec >= 60) {
-    rtc_sec = 0;
-    if (++rtc_min >= 60) {
-      rtc_min = 0;
-      if (++rtc_hr >= 24) {
-        rtc_hr = 0;
-        if (++rtc_day > days_in_month(rtc_month, rtc_year)) {
-          rtc_day = 1;
-          if (++rtc_month > 12) {
-            rtc_month = 1;
-            rtc_year++;
+  if (++rtc_data.second >= 60) {
+    rtc_data.second = 0;
+    if (++rtc_data.minute >= 60) {
+      rtc_data.minute = 0;
+      if (++rtc_data.hour >= 24) {
+        rtc_data.hour = 0;
+        if (++rtc_data.day > days_in_month(rtc_data.month, rtc_data.year)) {
+          rtc_data.day = 1;
+          if (++rtc_data.month > 12) {
+            rtc_data.month = 1;
+            rtc_data.year++;
           }
         }
-        if (++rtc_dow > 6) rtc_dow = 0;
+        if (++rtc_data.dow > 6) rtc_data.dow = 0;
       }
     }
     // Save every minute.
@@ -198,6 +217,8 @@ void rtc_timer_init() {
   TCCR2B = (1 << CS22) | (1 << CS20);  // prescaler 128
   TIMSK2 = (1 << TOIE2);               // enable overflow interrupt
   TCNT2 = 0;
+
+  // TODO: Read the RTC data from EEPROM, find the newest one and set the rtc_save_index to the index of the newest one.
 }
 
 // -------------------- Sleep --------------------
@@ -238,12 +259,12 @@ void handle_bus_read() {
   switch (reg) {
     case 0: fifo_pop(&kb_fifo, &out); break;
     case 1: fifo_pop(&ms_fifo, &out); break;
-    case 2: out = (rtc_year & 0x7F); break;
-    case 3: out = (rtc_month & 0x0F) | (lowbat_flag << 7) | (rtc_eeprom_error << 6) | (ps2_ack_error << 5); clear_errors(); break;
-    case 4: out = (rtc_day & 0x1F) | ((rtc_dow & 0x07) << 5); break;
-    case 5: out = rtc_hr; break;
-    case 6: out = rtc_min; break;
-    case 7: out = rtc_sec; break;
+    case 2: out = (rtc_data.year & 0x7F); break;
+    case 3: out = (rtc_data.month & 0x0F) | (lowbat_flag << 7) | (rtc_eeprom_error << 6) | (ps2_ack_error << 5); clear_errors(); break;
+    case 4: out = (rtc_data.day & 0x1F) | ((rtc_data.dow & 0x07) << 5); break;
+    case 5: out = rtc_data.hour; break;
+    case 6: out = rtc_data.minute; break;
+    case 7: out = rtc_data.second; break;
   }
   bus_output(out);
 }
@@ -260,15 +281,15 @@ void handle_bus_write() {
       fifo_push(&tx_fifo, val);
       ps2_kb_tx_service();
       break;
-    case 2: rtc_year = val & 0x7F; break;
-    case 3: rtc_month = val & 0x7F; break;
+    case 2: rtc_data.year = val & 0x7F; break;
+    case 3: rtc_data.month = val & 0x7F; break;
     case 4:
-      rtc_day = val & 0x1F;
-      rtc_dow = (val >> 5) & 0x07;
+      rtc_data.day = val & 0x1F;
+      rtc_data.dow = (val >> 5) & 0x07;
       break;
-    case 5: rtc_hr = val; break;
-    case 6: rtc_min = val; break;
-    case 7: rtc_sec = val; break;
+    case 5: rtc_data.hour = val; break;
+    case 6: rtc_data.minute = val; break;
+    case 7: rtc_data.second = val; break;
   }
 }
 
